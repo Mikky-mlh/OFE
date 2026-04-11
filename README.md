@@ -1,3 +1,5 @@
+[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-Visit_Site-d4351c?style=for-the-badge)](https://mikky-mlh.github.io/OFE/)
+
 # Editor - ONE HTML FILE CHALLENGE 🎯
 
 A powerful, feature-rich rich text editor packed into a single HTML file. Create, edit, and export documents in multiple formats—all from one interface with live preview.
@@ -162,8 +164,6 @@ This project demonstrates:
 - CSS animations and modern layout techniques
 - User experience design
 - Code optimization for size constraints
-
-[LIVE LINK](https://mikky-mlh.github.io/OFE/)
 
 ---
 
