@@ -93,6 +93,27 @@ body {
   color: var(--paper);
 }
 
+/* Open Button */
+.open-btn {
+  background: transparent;
+  border: 1px solid rgba(253, 252, 248, 0.5);
+  color: var(--paper);
+  padding: 8px 20px;
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 0.8em;
+  font-family: 'Courier New', monospace;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.open-btn:hover {
+  background: rgba(253, 252, 248, 0.1);
+  transform: translateY(-1px);
+}
+
 /* Export Dropdown */
 .export-wrapper {
   position: relative;
@@ -585,7 +606,6 @@ body {
 </head>
 <body>
 
-<!-- Header -->
 <header class="app-header">
   <h1>OFE(One File Editor)</h1>
   <div class="header-controls">
@@ -594,6 +614,10 @@ body {
       <button onclick="setView('editor')" id="vEditor">Editor</button>
       <button onclick="setView('preview')" id="vPreview">Preview</button>
     </div>
+    
+    <button class="open-btn" onclick="document.getElementById('fileOpen').click()" title="Open HTML or Text File">Open 📁</button>
+    <input type="file" id="fileOpen" style="display:none" accept=".html,.txt,.md" onchange="handleFileOpen(event)">
+    
     <div class="export-wrapper">
       <button class="export-btn" onclick="toggleExport()">Export ▾</button>
       <div class="export-menu" id="exportMenu">
@@ -607,7 +631,6 @@ body {
   </div>
 </header>
 
-<!-- Toolbar -->
 <div class="toolbar" id="toolbar">
   <select onchange="formatBlock(this.value); this.selectedIndex=0;" title="Format">
     <option value="" disabled selected>Format</option>
@@ -651,7 +674,6 @@ body {
 
   <div class="sep"></div>
 
-  <!-- Text Color -->
   <div style="position:relative;">
     <button onclick="toggleColorPicker('textColor')" title="Text Color" id="btnTextColor">
       <span style="border-bottom:3px solid red; padding-bottom:1px;">A</span>
@@ -659,7 +681,6 @@ body {
     <div class="color-popup" id="textColorPopup"></div>
   </div>
 
-  <!-- Highlight -->
   <div style="position:relative;">
     <button onclick="toggleColorPicker('bgColor')" title="Highlight" id="btnBgColor">
       <span style="background:#ff0;padding:0 3px;">A</span>
@@ -697,7 +718,6 @@ body {
   <button onclick="exec('redo')" title="Redo (Ctrl+Y)">↪</button>
 </div>
 
-<!-- Main Content -->
 <div class="main-container view-both" id="mainContainer">
   <div class="editor-pane">
     <div class="pane-header">Editor</div>
@@ -709,13 +729,11 @@ body {
   </div>
 </div>
 
-<!-- Status Bar -->
 <div class="status-bar">
   <span id="wordCount">Words: 0</span>
   <span id="charCount">Characters: 0</span>
 </div>
 
-<!-- Footer -->
 <footer style="background: var(--ink); color: var(--paper); padding: 20px 32px; text-align: center; border-top: 3px solid var(--accent); font-size: 0.85em;">
   <p style="margin-bottom: 12px;">Built with ❤️ by <strong>Yuvraj Sarathe</strong></p>
   <div style="display: flex; justify-content: center; gap: 24px; flex-wrap: wrap;">
@@ -726,7 +744,6 @@ body {
   <p style="margin-top: 12px; font-size: 0.9em; opacity: 0.7;">ONE HTML FILE CHALLENGE</p>
 </footer>
 
-<!-- Link Modal -->
 <div class="modal-overlay" id="linkModal">
   <div class="modal">
     <h3>Insert Link</h3>
@@ -746,7 +763,6 @@ body {
   </div>
 </div>
 
-<!-- Image Modal -->
 <div class="modal-overlay" id="imageModal">
   <div class="modal">
     <h3>Insert Image</h3>
@@ -763,7 +779,6 @@ body {
   </div>
 </div>
 
-<!-- Video Modal -->
 <div class="modal-overlay" id="videoModal">
   <div class="modal">
     <h3>Embed Video</h3>
@@ -776,7 +791,6 @@ body {
   </div>
 </div>
 
-<!-- Table Modal -->
 <div class="modal-overlay" id="tableModal">
   <div class="modal">
     <h3>Insert Table</h3>
@@ -794,7 +808,6 @@ body {
   </div>
 </div>
 
-<!-- Toast -->
 <div class="toast" id="toast"></div>
 
 <script>
@@ -890,6 +903,67 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
     if (e.target === this) this.classList.remove('open');
   });
 });
+
+// --- NEW: Handle Local File Open ---
+function handleFileOpen(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const fileName = file.name.toLowerCase();
+  const reader = new FileReader();
+
+  reader.onload = function(e) {
+    let content = e.target.result;
+
+    // If it is a Markdown file, run it through our custom parser
+    if (fileName.endsWith('.md')) {
+      content = parseMarkdownToHTML(content);
+    }
+
+    // Dump the final HTML/Text into the editor
+    editor.innerHTML = content;
+    updatePreview();
+    showToast('File opened successfully!');
+    event.target.value = ''; // Reset the input
+  };
+
+  reader.readAsText(file);
+}
+
+// A lightweight, custom Regular Expression parser to turn MD into HTML
+function parseMarkdownToHTML(md) {
+  let html = md;
+
+  // Headers (e.g., # Header 1 -> <h1>Header 1</h1>)
+  html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+  html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+  html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+
+  // Bold (e.g., **bold** -> <b>bold</b>)
+  html = html.replace(/\*\*(.*)\*\*/gim, '<b>$1</b>');
+
+  // Italics (e.g., *italic* -> <i>italic</i>)
+  html = html.replace(/\*(.*)\*/gim, '<i>$1</i>');
+
+  // Strikethrough (e.g., ~~strike~~ -> <s>strike</s>)
+  html = html.replace(/~~(.*)~~/gim, '<s>$1</s>');
+
+  // Blockquotes (e.g., > Quote -> <blockquote>Quote</blockquote>)
+  html = html.replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>');
+
+  // Horizontal rules (e.g., --- -> <hr>)
+  html = html.replace(/^---$/gim, '<hr>');
+
+  // Paragraphs (Wrap any loose text blocks separated by double line breaks in <p> tags)
+  html = html.split('\n\n').map(paragraph => {
+    // If the paragraph already starts with an HTML tag (like <h1>), leave it alone
+    if (paragraph.trim().startsWith('<')) return paragraph;
+    // Otherwise, wrap it in <p> tags
+    return '<p>' + paragraph + '</p>';
+  }).join('\n');
+
+  return html;
+}
 
 // --- Link ---
 function insertLink() {
