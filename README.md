@@ -1,4 +1,4 @@
-[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-Visit_Site-d4351c?style=for-the-badge)](https://mikky-mlh.github.io/OFE/)
+[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-Visit_Site-d4351c?style=for-the-badge)](https://yuvraj-sarathe.github.io/OFE/)
 
 # Editor - ONE HTML FILE CHALLENGE 🎯
 
